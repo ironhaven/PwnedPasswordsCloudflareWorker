@@ -56,7 +56,7 @@ function setCorsHeaders(headers) {
 function padResponse(originalBody) {
   let body = originalBody;
   const minimum = 800 - originalBody.split("\n").length;
-  const random = Math.floor(200 * cryptoRandom());
+  const random = cryptoRandom(200);
 
   for (i = 0; i < (minimum + random); i++) {
     body += "\r\n" + generateHex();
@@ -74,11 +74,14 @@ function generateHex() {
  }
  return result + ":0";
 }
-
-function cryptoRandom(){
-var array = new Uint32Array(1),
-    max = Math.pow(2, 32),
-    randomValue = crypto.getRandomValues(array)[0] / max;
-    
-return randomValue;
+// Random number generation with rejection
+function cryptoRandom(bound) {
+  const array = new Uint32Array(1);
+  const threshold = (2**32 - bound) % bound;
+  for (;;) {
+        const randomValue = crypto.getRandomValues(array)[0];
+        if (randomValue >= threshold) {
+            return randomValue % bound;
+        }
+    }
 }
